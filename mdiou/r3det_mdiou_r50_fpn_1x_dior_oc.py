@@ -1,0 +1,48 @@
+_base_ = ['../r3det/r3det_r50_fpn_1x_dior_oc.py']
+
+angle_version = 'oc'
+model = dict(
+    bbox_head=dict(
+        reg_decoded_bbox=True,
+        loss_bbox=dict(
+            type='MDLoss',
+            fun="log1p", 
+            loss_weight=1.0, 
+            iou_weight=1.0,
+            beta=0.5,
+            num_points=36,
+            dynamic=True)),
+    refine_heads=[
+        dict(
+            type='RotatedRetinaRefineHead',
+            num_classes=20,
+            in_channels=256,
+            stacked_convs=4,
+            feat_channels=256,
+            assign_by_circumhbbox=None,
+            anchor_generator=dict(
+                type='PseudoAnchorGenerator', strides=[8, 16, 32, 64, 128]),
+            bbox_coder=dict(
+                type='DeltaXYWHAOBBoxCoder',
+                angle_range=angle_version,
+                norm_factor=None,
+                edge_swap=False,
+                proj_xy=False,
+                target_means=(0.0, 0.0, 0.0, 0.0, 0.0),
+                target_stds=(1.0, 1.0, 1.0, 1.0, 1.0)),
+            loss_cls=dict(
+                type='FocalLoss',
+                use_sigmoid=True,
+                gamma=2.0,
+                alpha=0.25,
+                loss_weight=1.0),
+            reg_decoded_bbox=True,
+            loss_bbox=dict(
+                type='MDLoss',
+                fun="log1p", 
+                loss_weight=1.0, 
+                iou_weight=1.0,
+                beta=0.5,
+                num_points=36,
+                dynamic=False))
+    ])
